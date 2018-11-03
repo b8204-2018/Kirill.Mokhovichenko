@@ -4,7 +4,7 @@
 
 int main() {
     float x, y;
-    printf("%d\n","Введите координаты х и у")
+    printf("%d\n", "Введите координаты х и у");
     scanf("%x\n", &x);
     scanf("%y\n", &y);
     printf("%d", functionPoint(x, y));

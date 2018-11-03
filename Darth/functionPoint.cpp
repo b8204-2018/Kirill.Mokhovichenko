@@ -1,9 +1,8 @@
 #include <math.h>
 
 int functionPoint(float x,float y){
-    float x, y, r;
     int point;
-    r = sqrt(x * x + y * y);
+    float r = sqrt(x * x + y * y);
     if (r > 10){
         point = 0;
     }
@@ -16,9 +15,8 @@ int functionPoint(float x,float y){
     if (r > 2 && r <= 4){
         point = 3;
     }
-    if (r > 0 && r <= 2){
+    if (r >= 0 && r <= 2){
         point = 5;
     }
     return point;
 }
-
