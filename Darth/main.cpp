@@ -4,9 +4,9 @@
 
 int main() {
     float x, y;
-    printf("%d\n", "Введите координаты х и у");
-    scanf("%x\n", &x);
-    scanf("%y\n", &y);
+    printf("%d\n", "Vvedite koordinati x i y");
+    scanf("%f", &x);
+    scanf("%f", &y);
     printf("%d", functionPoint(x, y));
     return 0;
 }
