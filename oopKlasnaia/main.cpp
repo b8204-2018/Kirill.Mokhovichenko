@@ -160,7 +160,6 @@ public:
         myMoving += skip;
     }
 
-
     int heroDead(){
         return (HealthPoint == 0) ? 1 : 0;
     }
@@ -213,6 +212,7 @@ public:
         if (ability == 2) {
             if (getManaPoint() >= Light_strike_array_mana[getLvlSkill(2)]) {
                 removeMana(Light_strike_array_mana[getLvlSkill(2)]);
+
                 return Light_strike_array_damage[getLvlSkill(2)];
             }
         }
