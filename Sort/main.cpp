@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstring>
 #include "string.h"
 
 
@@ -9,20 +8,30 @@ class Sort{
 private:
 
 public:
+    virtual string nameSort() = 0;
     virtual void sort(int *arr, int n) = 0; //В родительском нет реализации.
 };
 
 class Quick : public Sort {
 public:
+
+    string nameSort() override {
+        cout << "Sort Quick : "  << endl;
+    }
+
     void sort(int *arr, int n) override {
-        cout << "Quick sort:" << endl;
+
     }
 };
 
 class Bubble : public Sort {
 public:
+
+    string nameSort() override {
+        cout << "Sort Bubble : "  << endl;
+    }
+
     void sort(int *arr, int n) override {
-        cout << "Bubble sort:" << endl;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n - 1; j++) {
                 if (arr[j] > arr[j + 1])
@@ -34,8 +43,12 @@ public:
 
 class Shell : public Sort {
 public:
+
+    string nameSort() override {
+        cout << "Sort Shell : "  << endl;
+    }
+
     void sort(int *arr, int n) override {
-        cout << "Shell sort:" << endl;
         int i, j, step;
         int tmp;
         for (step = n / 2; step > 0; step /= 2)
@@ -55,6 +68,7 @@ public:
 void printSortedArray(Sort &sort, int *arr, int n){
     int *res = new int[n];
     memcpy(res, arr, n * sizeof(int));
+    sort.nameSort();
     sort.sort(res, n);
     for (int i = 0; i < n; i++)
         cout << " " << res[i];
@@ -78,6 +92,7 @@ int main() {
     }
 
     cout << endl;
+
     printSortedArray(shellSort, userArray, n);
     printSortedArray(bubbleSort, userArray, n);
     printSortedArray(quickSort, userArray, n);
