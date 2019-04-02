@@ -6,27 +6,36 @@ using  namespace std;
 
 class Sort{
 public:
-    virtual void nameSort() = 0;
-    virtual void sort(int *arr, int n) = 0; //В родительском нет реализации.
+    virtual void nameSort(string name) = 0;
+    virtual void sort(int *arr, int n) = 0;
+    virtual string howNameSort() = 0;
 };
 
 class Quick : public Sort {
+private:
+    string name;
 public:
 
-    void nameSort() override {
-        cout << "Sort Quick : "  << endl;
+    void nameSort(string name) override {
+        this->name = name;
     }
 
     void sort(int *arr, int n) override {
 
     }
+
+    string howNameSort(){
+        return name;
+    }
 };
 
 class Bubble : public Sort {
+private:
+    string name;
 public:
 
-    void nameSort() override {
-        cout << "Sort Bubble : "  << endl;
+    void nameSort(string name) override {
+        this->name = name;
     }
 
     void sort(int *arr, int n) override {
@@ -37,13 +46,19 @@ public:
             }
         }
     }
+
+    string howNameSort(){
+        return name;
+    }
 };
 
 class Shell : public Sort {
+private:
+    string name;
 public:
 
-    void nameSort() override {
-        cout << "Sort Shell : "  << endl;
+    void nameSort(string name) override {
+        this->name = name;
     }
 
     void sort(int *arr, int n) override {
@@ -61,12 +76,16 @@ public:
                 arr[j] = tmp;
             }
     }
+
+    string howNameSort(){
+        return name;
+    }
 };
 
 void printSortedArray(Sort &sort, int *arr, int n){
     int *res = new int[n];
     memcpy(res, arr, n * sizeof(int));
-    sort.nameSort();
+    cout << "Using " << sort.howNameSort() << " sort :" << endl;
     sort.sort(res, n);
     for (int i = 0; i < n; i++)
         cout << " " << res[i];
@@ -90,6 +109,9 @@ int main() {
     }
 
     cout << endl;
+    shellSort.nameSort("Shell");
+    bubbleSort.nameSort("Bubble");
+    quickSort.nameSort("Quick");
 
     printSortedArray(shellSort, userArray, n);
     printSortedArray(bubbleSort, userArray, n);
