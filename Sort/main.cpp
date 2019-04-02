@@ -5,17 +5,15 @@
 using  namespace std;
 
 class Sort{
-private:
-
 public:
-    virtual string nameSort() = 0;
+    virtual void nameSort() = 0;
     virtual void sort(int *arr, int n) = 0; //В родительском нет реализации.
 };
 
 class Quick : public Sort {
 public:
 
-    string nameSort() override {
+    void nameSort() override {
         cout << "Sort Quick : "  << endl;
     }
 
@@ -27,7 +25,7 @@ public:
 class Bubble : public Sort {
 public:
 
-    string nameSort() override {
+    void nameSort() override {
         cout << "Sort Bubble : "  << endl;
     }
 
@@ -44,7 +42,7 @@ public:
 class Shell : public Sort {
 public:
 
-    string nameSort() override {
+    void nameSort() override {
         cout << "Sort Shell : "  << endl;
     }
 
