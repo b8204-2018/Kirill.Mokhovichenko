@@ -6,37 +6,29 @@ using  namespace std;
 
 class Sort{
 public:
-    virtual void nameSort(string name) = 0;
     virtual void sort(int *arr, int n) = 0;
-    virtual string howNameSort() = 0;
+    virtual string returnNameSort() = 0;
 };
+
 
 class Quick : public Sort {
 private:
-    string name;
+    string name = "Quick";
 public:
-
-    void nameSort(string name) override {
-        this->name = name;
-    }
 
     void sort(int *arr, int n) override {
 
     }
 
-    string howNameSort(){
+    string returnNameSort() override {
         return name;
     }
 };
 
 class Bubble : public Sort {
 private:
-    string name;
+    string name = "Bubble";
 public:
-
-    void nameSort(string name) override {
-        this->name = name;
-    }
 
     void sort(int *arr, int n) override {
         for (int i = 0; i < n; i++) {
@@ -47,19 +39,15 @@ public:
         }
     }
 
-    string howNameSort(){
+    string returnNameSort() override {
         return name;
     }
 };
 
 class Shell : public Sort {
 private:
-    string name;
+    string name = "Shell";
 public:
-
-    void nameSort(string name) override {
-        this->name = name;
-    }
 
     void sort(int *arr, int n) override {
         int i, j, step;
@@ -77,7 +65,7 @@ public:
             }
     }
 
-    string howNameSort(){
+    string returnNameSort() override {
         return name;
     }
 };
@@ -85,13 +73,12 @@ public:
 void printSortedArray(Sort &sort, int *arr, int n){
     int *res = new int[n];
     memcpy(res, arr, n * sizeof(int));
-    cout << "Using " << sort.howNameSort() << " sort :" << endl;
+    cout << "Using " << sort.returnNameSort() << " sort :" << endl;
     sort.sort(res, n);
     for (int i = 0; i < n; i++)
         cout << " " << res[i];
     cout << endl;
 }
-
 
 int main() {
     Shell shellSort;
@@ -109,12 +96,9 @@ int main() {
     }
 
     cout << endl;
-    shellSort.nameSort("Shell");
-    bubbleSort.nameSort("Bubble");
-    quickSort.nameSort("Quick");
-
     printSortedArray(shellSort, userArray, n);
     printSortedArray(bubbleSort, userArray, n);
     printSortedArray(quickSort, userArray, n);
+
     return 0;
 }
