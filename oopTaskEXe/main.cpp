@@ -448,7 +448,6 @@ void solveAllTasksFormats(CalculateTask &Calculator, string *allFiles, size_t am
         Calculator.printerAnswerOnTheScreen();
         Calculator.printerAnswerOnTheFile(allFiles[amount - 1]);
     }
-
 }
 
 int main() {
@@ -478,40 +477,15 @@ int main() {
     Calculator.addTaskFormat(File4);    // vector<TaskFormats*> formats; formats[3]
     Calculator.addTaskFormat(File5);    // vector<TaskFormats*> formats; formats[4]
     Calculator.addTaskFormat(File6);    // vector<TaskFormats*> formats; formats[5]
-    // Заполняем Task[] константами для решения примеров из файлов
+
     File1.getConstantsFromFile(file1);
     File2.getConstantsFromFile(file2);
     File3.getConstantsFromFile(file3);
     File4.getConstantsFromFile(file4);
     File5.getConstantsFromFile(file5);
     File6.getConstantsFromFile(file6);
-    //Узнаем какой формат примера в файле file1, и ставим в "Калькуляторе" какой пример решаем. (Устанавливаем формат)
     //completeAllSampleFormats(Calculator, allFormats , howAmountFormatsTask);
     solveAllTasksFormats(Calculator, allFiles, howAmountFormatsTask);
 
-//    Calculator.setFormatTask(findOutTaskFromFile(file1));
-//    Calculator.printerAnswerOnTheScreen();
-//    Calculator.printerAnswerOnTheScreen();
-//
-//    Calculator.setFormatTask(findOutTaskFromFile(file2));
-//    Calculator.printerAnswerOnTheScreen();
-//    Calculator.printerAnswerOnTheScreen();
-//
-//    Calculator.setFormatTask(findOutTaskFromFile(file3));
-//    Calculator.printerAnswerOnTheScreen();
-//    Calculator.printerAnswerOnTheScreen();
-//
-//    Calculator.setFormatTask(findOutTaskFromFile(file4));
-//    Calculator.printerAnswerOnTheScreen();
-//    Calculator.printerAnswerOnTheScreen();
-//
-//    Calculator.setFormatTask(findOutTaskFromFile(file5));
-//    Calculator.printerAnswerOnTheScreen();
-//    Calculator.printerAnswerOnTheScreen();
-//
-//    Calculator.setFormatTask(findOutTaskFromFile(file6));
-//    Calculator.printerAnswerOnTheScreen();
-//    Calculator.printerAnswerOnTheScreen();
-    
     return 0;
 }
