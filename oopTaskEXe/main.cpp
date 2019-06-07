@@ -7,18 +7,16 @@
 
 using namespace std;
 
-class TaskFormat{
+class SolverTaskFormat{
 public:
     virtual double *calculateTask(double *variabels) = 0;
 };
 
-
-
-class DirectoreFile{
+class CollectionFiles{
 private:
     string *nameFiles;
 public:
-    DirectoreFile(size_t amount){
+    CollectionFiles(size_t amount){
         nameFiles = new string[amount];
     }
 
@@ -31,10 +29,6 @@ public:
             yourFile.close();
             this->nameFiles[format - 1] = nameFile;
         }
-        else{
-            cout << "Error, File not found!";
-            yourFile.close();
-        }
     }
 
     string getFiles(size_t HowFormatSolve){
@@ -44,7 +38,7 @@ public:
 
 class ReaderFile{
 public:
-    string takeExample(DirectoreFile DirectoreFiles, size_t HowFormatSolve){
+    string takeExample(CollectionFiles DirectoreFiles, size_t HowFormatSolve){
         string example;
         ifstream yourFile;
         yourFile.open(DirectoreFiles.getFiles(HowFormatSolve), ios_base::in);
@@ -52,10 +46,6 @@ public:
             size_t format(0);
             yourFile >> format;
             yourFile >> example;
-            yourFile.close();
-        }
-        else{
-            cout << "Error, File not found!";
             yourFile.close();
         }
         return example;
@@ -90,15 +80,15 @@ public:
     }
 };
 
-class DirectoreTasks{
+class SolversCollection{
 private:
-    vector<TaskFormat*> formats;
+    vector<SolverTaskFormat*> formats;
 public:
-    void addTaskFormat(TaskFormat &newFormatTask) {
+    void addTaskFormat(SolverTaskFormat &newFormatTask) {
         formats.push_back(&newFormatTask);
     }
 
-    TaskFormat* getFormatTask(size_t HowFormatSolve){
+    SolverTaskFormat* getFormatTask(size_t HowFormatSolve){
         return formats[HowFormatSolve - 1];
     }
 };
@@ -146,23 +136,23 @@ public:
 
 class CalculateTask{
 private:
-    TaskFormat *CurrentTaskFormat;
+    SolverTaskFormat *CurrentTaskFormat;
 public:
-    CalculateTask(TaskFormat &f) {
+    CalculateTask(SolverTaskFormat &f) {
         CurrentTaskFormat = &f;
     }
 
-    void setFormatTask(DirectoreTasks &DirectoreTasks, DirectoreFile &DirectoreFiles, size_t HowFormatSolve) {
+    void setFormatTask(SolversCollection &DirectoreTasks, CollectionFiles &DirectoreFiles, size_t HowFormatSolve) {
         CurrentTaskFormat = DirectoreTasks.getFormatTask(HowFormatSolve);
     }
 
-    double *calculateThisTask(DirectoreFile DirectoreFiles, DirectoreTasks DirectoreTasks, ReaderFile Reader, Parser ParserVariabels, size_t HowFormatSolve){
+    double *calculateThisTask(CollectionFiles DirectoreFiles, SolversCollection DirectoreTasks, ReaderFile Reader, Parser ParserVariabels, size_t HowFormatSolve){
         setFormatTask(DirectoreTasks, DirectoreFiles, HowFormatSolve);
         return CurrentTaskFormat->calculateTask(ParserVariabels.takeVariabels(Reader.takeExample(DirectoreFiles, HowFormatSolve)));
     }
 };
 
-class Task1 : public TaskFormat{
+class SolverTask1 : public SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[3];
@@ -175,7 +165,7 @@ public:
     }
 };
 
-class Task2 : public  TaskFormat{
+class SolverTask2 : public  SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -185,7 +175,7 @@ public:
     }
 };
 
-class Task3 : public  TaskFormat{
+class SolverTask3 : public  SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -195,7 +185,7 @@ public:
     }
 };
 
-class Task4 : public  TaskFormat{
+class SolverTask4 : public  SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -205,7 +195,7 @@ public:
     }
 };
 
-class Task5 : public  TaskFormat{
+class SolverTask5 : public  SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -215,7 +205,7 @@ public:
     }
 };
 
-class Task6 : public  TaskFormat{
+class SolverTask6 : public  SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -225,7 +215,7 @@ public:
     }
 };
 
-class TaskOPZ : public TaskFormat{
+class SolverTaskOPZ : public SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -256,35 +246,35 @@ public:
 };
 
 int main() {
-    Task1 TaskExe1;
-    Task2 TaskExe2;
-    Task3 TaskExe3;
-    Task4 TaskExe4;
-    Task5 TaskExe5;
-    Task6 TaskExe6;
-    TaskOPZ TaskExeOPZ;
+    SolverTask1 TaskExe1;
+    SolverTask2 TaskExe2;
+    SolverTask3 TaskExe3;
+    SolverTask4 TaskExe4;
+    SolverTask5 TaskExe5;
+    SolverTask6 TaskExe6;
+    SolverTaskOPZ TaskExeOPZ;
 
     size_t amount = 7;
 
-    DirectoreFile DirectoreFiles(amount);
+    CollectionFiles CollectionsFiles(amount);
     // Добавляем в вектор файлов, которые можно решить
-    DirectoreFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer1.txt");      // vector<string> files; formats[0]
-    DirectoreFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer2.txt");      // vector<string> files; formats[1]
-    DirectoreFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer3.txt");      // vector<string> files; formats[2]
-    DirectoreFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer4.txt");      // vector<string> files; formats[3]
-    DirectoreFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer5.txt");      // vector<string> files; formats[4]
-    DirectoreFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer6.txt");      // vector<string> files; formats[5]
-    DirectoreFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer7.txt");      // vector<string> files; formats[6]
+    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer1.txt");      // vector<string> files; formats[0]
+    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer2.txt");      // vector<string> files; formats[1]
+    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer3.txt");      // vector<string> files; formats[2]
+    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer4.txt");      // vector<string> files; formats[3]
+    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer5.txt");      // vector<string> files; formats[4]
+    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer6.txt");      // vector<string> files; formats[5]
+    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer7.txt");      // vector<string> files; formats[6]
 
-    DirectoreTasks DirectoreTasks;
+    SolversCollection CollectionsSolversTask;
     // Добавляем в вектор форматов перимеры, которые можно решить из файлов
-    DirectoreTasks.addTaskFormat(TaskExe1);    // vector<TaskFormats*> formats; formats[0]
-    DirectoreTasks.addTaskFormat(TaskExe2);    // vector<TaskFormats*> formats; formats[1]
-    DirectoreTasks.addTaskFormat(TaskExe3);    // vector<TaskFormats*> formats; formats[2]
-    DirectoreTasks.addTaskFormat(TaskExe4);    // vector<TaskFormats*> formats; formats[3]
-    DirectoreTasks.addTaskFormat(TaskExe5);    // vector<TaskFormats*> formats; formats[4]
-    DirectoreTasks.addTaskFormat(TaskExe6);    // vector<TaskFormats*> formats; formats[5]
-    DirectoreTasks.addTaskFormat(TaskExeOPZ);    // vector<TaskFormats*> formats; formats[6]
+    CollectionsSolversTask.addTaskFormat(TaskExe1);    // vector<TaskFormats*> formats; formats[0]
+    CollectionsSolversTask.addTaskFormat(TaskExe2);    // vector<TaskFormats*> formats; formats[1]
+    CollectionsSolversTask.addTaskFormat(TaskExe3);    // vector<TaskFormats*> formats; formats[2]
+    CollectionsSolversTask.addTaskFormat(TaskExe4);    // vector<TaskFormats*> formats; formats[3]
+    CollectionsSolversTask.addTaskFormat(TaskExe5);    // vector<TaskFormats*> formats; formats[4]
+    CollectionsSolversTask.addTaskFormat(TaskExe6);    // vector<TaskFormats*> formats; formats[5]
+    CollectionsSolversTask.addTaskFormat(TaskExeOPZ);    // vector<TaskFormats*> formats; formats[6]
 
     ReaderFile ReadingClass;
     WriteAnAnswer WriteClass;
@@ -294,8 +284,8 @@ int main() {
     string outputFile = "/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/output.txt";
 
     for (size_t i = 1; i <= amount; i++) {
-        WriteClass.printSolveOnTheScreen(CalculatorTasks.calculateThisTask(DirectoreFiles, DirectoreTasks, ReadingClass, ParserVariabels, i), i);
-        WriteClass.printSolveOnTheFile(outputFile, CalculatorTasks.calculateThisTask(DirectoreFiles, DirectoreTasks, ReadingClass, ParserVariabels, i), i);
+        WriteClass.printSolveOnTheScreen(CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass, ParserVariabels, i), i);
+        WriteClass.printSolveOnTheFile(outputFile, CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass, ParserVariabels, i), i);
     }
 
 
