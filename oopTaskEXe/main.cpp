@@ -7,62 +7,93 @@
 
 using namespace std;
 
-class SolverTaskFormat{
+class SolverTaskFormat {
 public:
     virtual double *calculateTask(double *variabels) = 0;
 };
 
-class CollectionFiles{
+class CollectionFiles {
 private:
-    string *nameFiles;
+    vector<string> nameFiles;
 public:
-    CollectionFiles(size_t amount){
-        nameFiles = new string[amount];
-    }
-
-    void addFile(string nameFile){
+    void addFile(const string nameFile) {
         ifstream yourFile;
         yourFile.open(nameFile, ios_base::in);
-        if (yourFile.is_open()){
+        if (yourFile.is_open()) {
             size_t format(0);
             yourFile >> format;
             yourFile.close();
-            this->nameFiles[format - 1] = nameFile;
+            nameFiles.push_back(nameFile);
+        }
+        else {
+
         }
     }
 
-    string getFiles(size_t HowFormatSolve){
+    string getFile(size_t HowFormatSolve) const {      //(size_t HowFormatSolve const)  будет работать с конст
         return nameFiles[HowFormatSolve - 1];
     }
 };
 
-class ReaderFile{
+class ReaderFile {
 public:
-    string takeExample(CollectionFiles DirectoreFiles, size_t HowFormatSolve){
+    string takeExample(const CollectionFiles &CollectionFiles, size_t HowFormatSolve) const {
         string example;
         ifstream yourFile;
-        yourFile.open(DirectoreFiles.getFiles(HowFormatSolve), ios_base::in);
-        if (yourFile.is_open()){
+        yourFile.open(CollectionFiles.getFile(HowFormatSolve), ios_base::in);
+        if (yourFile.is_open()) {
             size_t format(0);
             yourFile >> format;
             yourFile >> example;
             yourFile.close();
         }
+        else {
+
+        }
+
         return example;
     }
 };
 
-class WriteAnAnswer{
+class InterfacePrintAnswer {
 public:
-    void printSolveOnTheScreen(double *answer, size_t numbFile) {
+    virtual void printSolver(double *answer, size_t numbFile) = 0;
+};
+
+class PrintSolver {
+    InterfacePrintAnswer *Writer;
+public:
+
+    void setWriter(InterfacePrintAnswer &Writer) {
+        this->Writer = &Writer;
+    }
+
+    void printSolver(double *answer, size_t numbFile){
+        Writer->printSolver(answer, numbFile);
+    }
+};
+
+class WriteOnTheScreen : public InterfacePrintAnswer {
+public:
+    void printSolver(double *answer, size_t numbFile) {
         cout << "Решение из файла: \"" << numbFile << "\"" << endl;
-        for(size_t i = 1; i <= answer[0]; i++){
+        for (size_t i = 1; i <= answer[0]; i++) {
             cout << "Ответ " << i << " :  " << answer[i] << endl;
         }
         cout << endl;
     }
 
-    void printSolveOnTheFile(string nameFile, double *answer, size_t numbFile){
+};
+
+class WriteOnTheFile : public InterfacePrintAnswer {
+private:
+    string nameFile;
+public:
+    WriteOnTheFile(string nameFile) {
+        this->nameFile = nameFile;
+    }
+
+    void printSolver(double *answer, size_t numbFile) {
         ofstream outputFile;
         ifstream outputFileForCheck;
         string str;
@@ -70,7 +101,7 @@ public:
         outputFileForCheck.open(nameFile, ios_base::in);
         if (outputFileForCheck.is_open()) {
             outputFile << "Решение из файла: \"" << numbFile << "\"" << endl;
-            for(size_t i = 1; i <= answer[0]; i++){
+            for(size_t i = 1; i <= answer[0]; i++) {
                 outputFile << "Ответ " << i << " :  " << answer[i] << endl;
             }
             outputFile << endl;
@@ -78,9 +109,13 @@ public:
         outputFile.close();
         outputFileForCheck.close();
     }
+
+    void setFile(string nameFile){
+        this->nameFile = nameFile;
+    }
 };
 
-class SolversCollection{
+class SolversCollection {
 private:
     vector<SolverTaskFormat*> formats;
 public:
@@ -88,14 +123,14 @@ public:
         formats.push_back(&newFormatTask);
     }
 
-    SolverTaskFormat* getFormatTask(size_t HowFormatSolve){
+    SolverTaskFormat* getFormatTask(size_t HowFormatSolve) const {
         return formats[HowFormatSolve - 1];
     }
 };
 
 class Parser {
     char Num[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    int isNum(char sumbol) {
+    int isNum(char sumbol) const {
         for (int i = 0; i < 10; i++) {
             if (sumbol == Num[i]) {
                 return i;
@@ -104,13 +139,12 @@ class Parser {
         return -1;
     }
 public:
-    double *takeVariabels(string exercize) {
+    double *takeVariabels(string exercize) const {
         double *vars = new double[5];
         int count = 0, i = 0;
-        exercize += '\0';
         while (exercize[i] != '\0') {
             if (isNum(exercize[i]) == -1) {
-                if ((exercize[i] == 'x')&&(exercize[i + 1] == '2'))
+                if ((exercize[i] == 'x') && (exercize[i + 1] == '2'))
                     i++;
                 i++;
             }
@@ -134,7 +168,7 @@ public:
     }
 };
 
-class CalculateTask{
+class CalculateTask {
 private:
     SolverTaskFormat *CurrentTaskFormat;
 public:
@@ -142,30 +176,30 @@ public:
         CurrentTaskFormat = &f;
     }
 
-    void setFormatTask(SolversCollection &DirectoreTasks, CollectionFiles &DirectoreFiles, size_t HowFormatSolve) {
+    void setFormatTask(const SolversCollection &DirectoreTasks, const CollectionFiles &DirectoreFiles, size_t HowFormatSolve) {
         CurrentTaskFormat = DirectoreTasks.getFormatTask(HowFormatSolve);
     }
 
-    double *calculateThisTask(CollectionFiles DirectoreFiles, SolversCollection DirectoreTasks, ReaderFile Reader, Parser ParserVariabels, size_t HowFormatSolve){
+    double *calculateThisTask(const CollectionFiles &DirectoreFiles, const SolversCollection &DirectoreTasks, const ReaderFile &Reader, const Parser &ParserVariabels, size_t HowFormatSolve) {
         setFormatTask(DirectoreTasks, DirectoreFiles, HowFormatSolve);
         return CurrentTaskFormat->calculateTask(ParserVariabels.takeVariabels(Reader.takeExample(DirectoreFiles, HowFormatSolve)));
     }
 };
 
-class SolverTask1 : public SolverTaskFormat{
+class SolverTask1 : public SolverTaskFormat {
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[3];
         answer[0] = 2;
         if ((variabels[1] * variabels[1] - 4 * variabels[0] * variabels[2]) >= 0) {
-            answer[1] = ((-1 * variabels[1] + sqrt(variabels[1] * variabels[1] - 4 * variabels[0] * variabels[2])) / (2 * variabels[0]));
-            answer[2] = ((-1 * variabels[1] - sqrt(variabels[1] * variabels[1] - 4 * variabels[0] * variabels[2])) / (2 * variabels[0]));
+            answer[1] = (-1 * variabels[1] + sqrt(variabels[1] * variabels[1] - 4 * variabels[0] * variabels[2])) / (2 * variabels[0]);
+            answer[2] = (-1 * variabels[1] - sqrt(variabels[1] * variabels[1] - 4 * variabels[0] * variabels[2])) / (2 * variabels[0]);
         }
         return answer;
     }
 };
 
-class SolverTask2 : public  SolverTaskFormat{
+class SolverTask2 : public SolverTaskFormat {
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -175,7 +209,7 @@ public:
     }
 };
 
-class SolverTask3 : public  SolverTaskFormat{
+class SolverTask3 : public SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -185,7 +219,7 @@ public:
     }
 };
 
-class SolverTask4 : public  SolverTaskFormat{
+class SolverTask4 : public SolverTaskFormat{
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -195,7 +229,7 @@ public:
     }
 };
 
-class SolverTask5 : public  SolverTaskFormat{
+class SolverTask5 : public  SolverTaskFormat {
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -205,7 +239,7 @@ public:
     }
 };
 
-class SolverTask6 : public  SolverTaskFormat{
+class SolverTask6 : public SolverTaskFormat {
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -215,7 +249,7 @@ public:
     }
 };
 
-class SolverTaskOPZ : public SolverTaskFormat{
+class SolverTaskOPZ : public SolverTaskFormat {
 public:
     double *calculateTask(double *variabels) override {
         double *answer = new double[2];
@@ -256,7 +290,7 @@ int main() {
 
     size_t amount = 7;
 
-    CollectionFiles CollectionsFiles(amount);
+    CollectionFiles CollectionsFiles;
     // Добавляем в вектор файлов, которые можно решить
     CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer1.txt");      // vector<string> files; formats[0]
     CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer2.txt");      // vector<string> files; formats[1]
@@ -276,18 +310,25 @@ int main() {
     CollectionsSolversTask.addTaskFormat(TaskExe6);    // vector<TaskFormats*> formats; formats[5]
     CollectionsSolversTask.addTaskFormat(TaskExeOPZ);    // vector<TaskFormats*> formats; formats[6]
 
+    string outputFile = "/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/output.txt";
+
     ReaderFile ReadingClass;
-    WriteAnAnswer WriteClass;
+
+    PrintSolver PrintAnswer;
+    WriteOnTheFile WriteFile(outputFile);
+    WriteOnTheScreen WriteScreen;
     Parser ParserVariabels;
     CalculateTask CalculatorTasks(TaskExe1);
 
-    string outputFile = "/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/output.txt";
+    PrintAnswer.setWriter(WriteFile);
 
-    for (size_t i = 1; i <= amount; i++) {
-        WriteClass.printSolveOnTheScreen(CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass, ParserVariabels, i), i);
-        WriteClass.printSolveOnTheFile(outputFile, CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass, ParserVariabels, i), i);
-    }
+    for (size_t i = 1; i <= amount; i++)
+        PrintAnswer.printSolver(CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass, ParserVariabels, i), i);
 
+    PrintAnswer.setWriter(WriteScreen);
+
+    for (size_t i = 1; i <= amount; i++)
+        PrintAnswer.printSolver(CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass, ParserVariabels, i), i);
 
     return 0;
 }
