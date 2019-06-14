@@ -4,6 +4,7 @@
 #include <math.h>
 #include <vector>
 #include <stack>
+#include <exception>
 
 using namespace std;
 
@@ -16,21 +17,26 @@ class CollectionFiles {
 private:
     vector<string> nameFiles;
 public:
-    void addFile(const string nameFile) {
+    int addFile(const string nameFile) {
         ifstream yourFile;
         yourFile.open(nameFile, ios_base::in);
+        if (!yourFile.is_open())
+            throw invalid_argument(nameFile);
         if (yourFile.is_open()) {
             size_t format(0);
             yourFile >> format;
             yourFile.close();
             nameFiles.push_back(nameFile);
-        }
-        else {
-
+            return 1;
         }
     }
 
-    string getFile(size_t HowFormatSolve) const {      //(size_t HowFormatSolve const)  будет работать с конст
+    string getFile(size_t HowFormatSolve) const {
+        ifstream yourFile;
+        yourFile.open(nameFiles[HowFormatSolve - 1], ios_base::in);
+        if (!yourFile.is_open())
+            throw length_error(to_string(HowFormatSolve));
+        yourFile.close();
         return nameFiles[HowFormatSolve - 1];
     }
 };
@@ -41,23 +47,34 @@ public:
         string example;
         ifstream yourFile;
         yourFile.open(CollectionFiles.getFile(HowFormatSolve), ios_base::in);
+        if (!yourFile.is_open())
+            throw invalid_argument(CollectionFiles.getFile(HowFormatSolve));
         if (yourFile.is_open()) {
             size_t format(0);
             yourFile >> format;
             yourFile >> example;
             yourFile.close();
         }
-        else {
-
-        }
-
         return example;
+    }
+
+    int howFormatTaskInFile(const CollectionFiles &CollectionFiles, size_t HowFormatSolve) const {
+        size_t format(0);
+        ifstream yourFile;
+        yourFile.open(CollectionFiles.getFile(HowFormatSolve), ios_base::in);
+        if (!yourFile.is_open())
+            throw invalid_argument(CollectionFiles.getFile(HowFormatSolve));
+        if (yourFile.is_open()) {
+            yourFile >> format;
+            yourFile.close();
+        }
+        return format;
     }
 };
 
 class InterfacePrintAnswer {
 public:
-    virtual void printSolver(double *answer, size_t numbFile) = 0;
+    virtual void printSolver(double *answer, string nameFile) = 0;
 };
 
 class PrintSolver {
@@ -68,15 +85,15 @@ public:
         this->Writer = &Writer;
     }
 
-    void printSolver(double *answer, size_t numbFile){
-        Writer->printSolver(answer, numbFile);
+    void printSolver(double *answer, string nameFile){
+        Writer->printSolver(answer, nameFile);
     }
 };
 
 class WriteOnTheScreen : public InterfacePrintAnswer {
 public:
-    void printSolver(double *answer, size_t numbFile) {
-        cout << "Решение из файла: \"" << numbFile << "\"" << endl;
+    void printSolver(double *answer, string nameFile) {
+        cout << "Решение из файла: \"" << nameFile << "\"" << endl;
         for (size_t i = 1; i <= answer[0]; i++) {
             cout << "Ответ " << i << " :  " << answer[i] << endl;
         }
@@ -93,7 +110,7 @@ public:
         this->nameFile = nameFile;
     }
 
-    void printSolver(double *answer, size_t numbFile) {
+    void printSolver(double *answer, string numbFile) {
         ofstream outputFile;
         ifstream outputFileForCheck;
         string str;
@@ -124,17 +141,16 @@ public:
     }
 
     SolverTaskFormat* getFormatTask(size_t HowFormatSolve) const {
+        if (formats[HowFormatSolve - 1] == nullptr)
+            throw out_of_range(to_string(HowFormatSolve));
         return formats[HowFormatSolve - 1];
     }
 };
 
 class Parser {
-    char Num[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    int isNum(char sumbol) const {
-        for (int i = 0; i < 10; i++) {
-            if (sumbol == Num[i]) {
-                return i;
-            }
+    int isNum(char symbol) const {                // Ну да у Полины, а кому сейчас легко?
+        if (symbol >= 48 && symbol <= 57) {
+            return -(48 - symbol);
         }
         return -1;
     }
@@ -176,13 +192,13 @@ public:
         CurrentTaskFormat = &f;
     }
 
-    void setFormatTask(const SolversCollection &DirectoreTasks, const CollectionFiles &DirectoreFiles, size_t HowFormatSolve) {
-        CurrentTaskFormat = DirectoreTasks.getFormatTask(HowFormatSolve);
+    void setFormatTask(const SolversCollection &SolversCollection, const CollectionFiles &CollectionFiles, const ReaderFile &Reader, size_t HowFormatSolve) {
+        CurrentTaskFormat = SolversCollection.getFormatTask(Reader.howFormatTaskInFile(CollectionFiles, HowFormatSolve));
     }
 
-    double *calculateThisTask(const CollectionFiles &DirectoreFiles, const SolversCollection &DirectoreTasks, const ReaderFile &Reader, const Parser &ParserVariabels, size_t HowFormatSolve) {
-        setFormatTask(DirectoreTasks, DirectoreFiles, HowFormatSolve);
-        return CurrentTaskFormat->calculateTask(ParserVariabels.takeVariabels(Reader.takeExample(DirectoreFiles, HowFormatSolve)));
+    double *calculateThisTask(const CollectionFiles &CollectionFiles, const SolversCollection &SolversCollection, const ReaderFile &Reader, const Parser &ParserVariabels, size_t HowFormatSolve) {
+        setFormatTask(SolversCollection, CollectionFiles,  Reader, HowFormatSolve);
+        return CurrentTaskFormat->calculateTask(ParserVariabels.takeVariabels(Reader.takeExample(CollectionFiles, HowFormatSolve)));
     }
 };
 
@@ -288,27 +304,36 @@ int main() {
     SolverTask6 TaskExe6;
     SolverTaskOPZ TaskExeOPZ;
 
-    size_t amount = 7;
+    size_t amountFiles = 0;
 
     CollectionFiles CollectionsFiles;
-    // Добавляем в вектор файлов, которые можно решить
-    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer1.txt");      // vector<string> files; formats[0]
-    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer2.txt");      // vector<string> files; formats[1]
-    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer3.txt");      // vector<string> files; formats[2]
-    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer4.txt");      // vector<string> files; formats[3]
-    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer5.txt");      // vector<string> files; formats[4]
-    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer6.txt");      // vector<string> files; formats[5]
-    CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer7.txt");      // vector<string> files; formats[6]
+
+    try {
+        amountFiles += CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer4.txt");
+        amountFiles += CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer1.txt");
+        amountFiles += CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer2.txt");
+        amountFiles += CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer7.txt");
+        amountFiles += CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer3.txt");
+        amountFiles += CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer6.txt");
+        amountFiles += CollectionsFiles.addFile("/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/exer5.txt");
+
+
+    }
+
+    catch(invalid_argument(e)) {
+        cout << "ERROR! \"" << e.what() << "\" file was not found!" << endl;
+        return 0;
+    }
 
     SolversCollection CollectionsSolversTask;
-    // Добавляем в вектор форматов перимеры, которые можно решить из файлов
+
     CollectionsSolversTask.addTaskFormat(TaskExe1);    // vector<TaskFormats*> formats; formats[0]
     CollectionsSolversTask.addTaskFormat(TaskExe2);    // vector<TaskFormats*> formats; formats[1]
     CollectionsSolversTask.addTaskFormat(TaskExe3);    // vector<TaskFormats*> formats; formats[2]
     CollectionsSolversTask.addTaskFormat(TaskExe4);    // vector<TaskFormats*> formats; formats[3]
     CollectionsSolversTask.addTaskFormat(TaskExe5);    // vector<TaskFormats*> formats; formats[4]
     CollectionsSolversTask.addTaskFormat(TaskExe6);    // vector<TaskFormats*> formats; formats[5]
-    CollectionsSolversTask.addTaskFormat(TaskExeOPZ);    // vector<TaskFormats*> formats; formats[6]
+    CollectionsSolversTask.addTaskFormat(TaskExeOPZ);  // vector<TaskFormats*> formats; formats[6]
 
     string outputFile = "/home/kirillpavyk/DirectoreHome/ProjectC++Repozitorii/Kirill.Mokhovichenko/oopTaskEXe/file/output.txt";
 
@@ -321,14 +346,23 @@ int main() {
     CalculateTask CalculatorTasks(TaskExe1);
 
     PrintAnswer.setWriter(WriteFile);
-
-    for (size_t i = 1; i <= amount; i++)
-        PrintAnswer.printSolver(CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass, ParserVariabels, i), i);
+    try {
+        for (size_t i = 1; i <= amountFiles; i++)
+            PrintAnswer.printSolver(CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass,ParserVariabels, i), CollectionsFiles.getFile(i));
+    }
+    catch(length_error(e)) {
+        cout << "ERROR! \" The file from the directory of files was not found in the cell \"" << e.what() << "\", check that the function parameter is correct." << endl;
+        return 0;
+    }
 
     PrintAnswer.setWriter(WriteScreen);
+    try {
+        for (size_t i = 1; i <= amountFiles; i++)
+            PrintAnswer.printSolver(CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass,ParserVariabels, i), CollectionsFiles.getFile(i));
+    }
+    catch(length_error(e)) {
+        cout << "ERROR! \" The file from the directory of files was not found in the cell \"" << e.what() << "\", check that the function parameter is correct." << endl;
+        return 0;
+    }
 
-    for (size_t i = 1; i <= amount; i++)
-        PrintAnswer.printSolver(CalculatorTasks.calculateThisTask(CollectionsFiles, CollectionsSolversTask, ReadingClass, ParserVariabels, i), i);
-
-    return 0;
 }
